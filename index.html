@@ -55,7 +55,6 @@ textarea::placeholder{color:var(--pink2)}
 .nav .next:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
 .done{text-align:center;padding:6px 0}
 .done svg{width:76px;height:76px;margin-bottom:6px}
-.wa{display:block;margin-top:18px;padding:15px;border-radius:999px;background:linear-gradient(90deg,var(--pink),#f0569a);color:#fff;font-weight:800;text-decoration:none;box-shadow:0 8px 18px rgba(231,60,122,.35)}
 footer{text-align:center;color:var(--brown);font-weight:700;font-size:12px;margin-top:18px}
 </style>
 </head>
@@ -135,8 +134,7 @@ footer{text-align:center;color:var(--brown);font-weight:700;font-size:12px;margi
   <div class="step done" id="fin">
     <svg viewBox="0 0 24 24"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#e73c7a"/><stop offset="1" stop-color="#78b0e0"/></linearGradient></defs><path fill="url(#g)" d="M12 21s-7-4.6-9.3-9.2C1 8.3 3 5 6.3 5c2 0 3.6 1.2 4.4 2.7h2.6C14.1 6.2 15.700 5 17.700 5 21 5 23 8.300 21.300 11.800 19 16.400 12 21 12 21z"/></svg>
     <h2>¡Gracias por tu tiempo!</h2>
-    <p class="hint" style="margin:0">Tu opinión nos ayuda a hacer el Cookie Cup aún mejor.<br>Toca el botón para enviarnos tus respuestas por WhatsApp.</p>
-    <a class="wa" id="wa" href="#">Enviar respuestas por WhatsApp</a>
+    <p class="hint" style="margin:0">Tu opinión nos ayuda a hacer el Cookie Cup aún mejor.</p>
   </div>
 
   <div class="nav" id="nav">
@@ -149,6 +147,7 @@ footer{text-align:center;color:var(--brown);font-weight:700;font-size:12px;margi
 
 <script>
 (function(){
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqefmRO7pgBxzSeGtz4_8kwF4PVG0ufC4EcrDN_CeKb6mvRe9CEIhHilE8-sFw8llM/exec';
   var steps = Array.prototype.slice.call(document.querySelectorAll('.step[data-k]'));
   var fin = document.getElementById('fin'), total = steps.length, i = 0, ans = {};
   var next = document.getElementById('next'), back = document.getElementById('back');
@@ -180,14 +179,17 @@ footer{text-align:center;color:var(--brown);font-weight:700;font-size:12px;margi
   back.addEventListener('click', function(){ if (i > 0) { i--; render(); } });
   next.addEventListener('click', function(){
     if (i < total - 1) { i++; render(); return; }
-    var c = document.getElementById('coment').value.trim() || '—';
-    var msg = '*Opinión Cookie Cup MJ*\n\n' +
-      '1. Calificación: ' + ans.general + '\n' +
-      '2. Lo que más me gustó: ' + ans.sabor + '\n' +
-      '3. Precio: ' + ans.precio + '\n' +
-      '4. ¿Recomendaría?: ' + ans.recomienda + '\n' +
-      '5. Sugerencia: ' + c;
-    document.getElementById('wa').href = 'https://wa.me/573046150915?text=' + encodeURIComponent(msg);
+    next.disabled = true;
+    var data = {
+      general: ans.general,
+      sabor: ans.sabor,
+      precio: ans.precio,
+      recomienda: ans.recomienda,
+      sugerencia: document.getElementById('coment').value.trim()
+    };
+    try {
+      fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+    } catch (e) {}
     steps.forEach(function(s){ s.classList.remove('on'); });
     document.getElementById('nav').style.display = 'none';
     document.getElementById('top').style.display = 'none';
